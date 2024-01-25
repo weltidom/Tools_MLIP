@@ -149,8 +149,9 @@ class Xyz:
         self.assign = assignment # dictionary with number to atom species assignment
         self.path = f'{folder}/{name}'
 
-    def unpack(self, lst):
-        '''Unpack list (2 levels) and turn into string'''
+    @staticmethod
+    def unpack(lst):
+        '''Unpack list (2 levels) and turn into string.'''
         unpacked = ''
         for entry in lst:
             unpacked = f'{unpacked} {" ".join(entry)}'
@@ -167,11 +168,13 @@ class Xyz:
         '''Write configuration data to extended XYZ file for use in MACE.'''
         with open(f'{self.path}.xyz', 'w') as f:
             for index, subset in data.iterrows():
-                f.write(f"{subset['Config. size'].to_string(index=False)}\n")
+                f.write(f"{subset['Config. size']}\n")
 
                 # determine whether lattice parameters are contained within dataset
                 if len(subset['Lattice'])>=2:
-                    lat=f'Lattice=\"{self.unpack(subset["Lattice"].to_list()[0])}\"'
+                    #lat=self.unpack(subset['Lattice'].to_list()[0])
+                    lat=self.unpack(subset['Lattice'])
+                    lat=f'Lattice=\"{lat}\"'
                     pbc=f'pbc=\"T T T\"'
                 else:
                     lat=''
@@ -179,14 +182,14 @@ class Xyz:
 
                 if 'Force' in data.columns:
                     f.write(f'Energy={float(subset["Energy"])} {lat} Properties=species:S:1:pos:R:3:forces:R:3 {pbc}\n')
-                    for species, position, force in zip(subset['Atom'][0], subset['Position'][0], subset['Force'][0]):
+                    for species, position, force in zip(subset['Atom'], subset['Position'], subset['Force']):
                         if not species in self.assign:
                             print(f'Type {species} not contained within self.assign.')
                             return
                         f.write(f'{self.type_to_symbol(species)}{position[0]:>12}{position[1]:>12}{position[2]:>12}{force[0]:>12}{force[1]:>12}{force[2]:>12}\n')
                 else:
-                    f.write(f'Energy={float(subset["Energy"])} Lattice=\"{self.unpack(subset["Lattice"].to_list()[0])}\" Properties=species:S:1:pos:R:3\n')
-                    for species, position in zip(subset['Atom'][0], subset['Position'][0]):
+                    f.write(f'Energy={float(subset["Energy"])} {lat} Properties=species:S:1:pos:R:3 {pbc}\n')
+                    for species, position in zip(subset['Atom'], subset['Position']):
                         if not species in self.assign:
                             print(f'Type {species} not contained within self.assign.')
                             return
