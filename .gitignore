@@ -1,4 +1,5 @@
 **cache
-*Submit_Jobs.ipynb
-*.DS_Store
-*.pyc
+**Submit_Jobs.ipynb
+**.DS_Store
+**.pyc
+**.gitignore
