@@ -1,0 +1,14 @@
+from ase.optimize.sciopt import SciPyFminCG
+from ase.io import read
+import numpy as np
+
+from mace.calculators import MACECalculator
+
+calculator = MACECalculator(model_paths='/home/st/st_us-031400/st_st179390/mace/ANI-1ccx_multi-gpu/ANI-1ccx.model', device='cuda')
+conf = read('graphite.json', '0', format='json')
+conf.set_calculator(calculator)
+
+dyn = SciPyFminCG(conf, trajectory='graphite.traj')
+
+dyn.run(fmax=0.02)
+print("Optimization finished!")
