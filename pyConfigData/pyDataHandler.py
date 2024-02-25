@@ -157,12 +157,56 @@ class Xyz:
             unpacked = f'{unpacked} {" ".join(entry)}'
         return unpacked[1:]
 
-    def type_to_symbol(self, no: int):
+    def type_to_symbol(self, no):
         '''Method for turning atom type numbers to atomic symbols.'''
+        if len(self.assign)<1:
+            return no
         for type, symbol in self.assign.items():
             if type==no:
                 species=symbol
         return species
+    
+    def read(self, desc:str='', inference:bool=False, energy_key:str='NequIP_energy', force_key:str='NequIP_forces'):
+        '''Read and parse data from extended XYZ file. Resulting dataframe saved under self.data.'''
+        atoms_lst = io.read(
+            self.path,
+            index=':',
+            format='extxyz'
+        )
+        
+        data_lst = []
+        for i, atom in enumerate(atoms_lst):
+            entry_dict = atom.todict()
+            entry = pd.DataFrame({
+                    'Type': desc,
+                    'Name': ''.join(np.unique(atom.get_chemical_symbols())),
+                    #'Lattice': [entry_dict['cell']],
+                    'Configuration': i+1,
+                    'Config. size': len(atom.get_positions()),
+                    'Energy': entry_dict['info']['energy'],
+                    #'Energy_Inference': entry_dict['info'][energy_key],
+                    'Atom': [atom.get_chemical_symbols()],
+                    'Position': [entry_dict['positions']],
+                    #'Force': [entry_dict['forces']],
+                    #'Force_Inference': [entry_dict[force_key]],
+                    })
+            if 'energy' in entry_dict['info']:
+                entry['Energy']=entry_dict['info']['energy']
+            elif 'Energy' in entry_dict['info']:
+                entry['Energy']=entry_dict['info']['Energy']
+
+            if inference:
+                entry['Energy_Inference'] = entry_dict['info'][energy_key]
+                if len(force_key)>0:
+                    entry['Force_Inference'] = [entry_dict[force_key]]
+            if ('T' in entry_dict['pbc']):
+                entry['Lattice'] = [entry_dict['cell']]
+            if 'forces' in entry_dict:
+                entry['Force']=[entry_dict['forces']]
+
+            data_lst.append(entry)
+            
+        self.data = pd.concat(data_lst)
 
     def write(self, data:pd.DataFrame):
         '''Write configuration data to extended XYZ file for use in MACE.'''
@@ -171,26 +215,26 @@ class Xyz:
                 f.write(f"{subset['Config. size']}\n")
 
                 # determine whether lattice parameters are contained within dataset
-                if len(subset['Lattice'])>=2:
+                if 'Lattice' in subset:
                     #lat=self.unpack(subset['Lattice'].to_list()[0])
                     lat=self.unpack(subset['Lattice'])
                     lat=f'Lattice=\"{lat}\"'
                     pbc=f'pbc=\"T T T\"'
                 else:
                     lat=''
-                    pbc=''
+                    pbc=f'pbc=\"F F F\"'
 
                 if 'Force' in data.columns:
                     f.write(f'Energy={float(subset["Energy"])} {lat} Properties=species:S:1:pos:R:3:forces:R:3 {pbc}\n')
                     for species, position, force in zip(subset['Atom'], subset['Position'], subset['Force']):
                         if not species in self.assign:
                             print(f'Type {species} not contained within self.assign.')
-                            return
                         f.write(f'{self.type_to_symbol(species)}{position[0]:>12}{position[1]:>12}{position[2]:>12}{force[0]:>12}{force[1]:>12}{force[2]:>12}\n')
                 else:
                     f.write(f'Energy={float(subset["Energy"])} {lat} Properties=species:S:1:pos:R:3 {pbc}\n')
                     for species, position in zip(subset['Atom'], subset['Position']):
                         if not species in self.assign:
                             print(f'Type {species} not contained within self.assign.')
-                            return
                         f.write(f'{self.type_to_symbol(species)}{position[0]:>24}{position[1]:>24}{position[2]:>24}\n')
+
+        print(f'XYZ file saved {self.path}.xyz')
