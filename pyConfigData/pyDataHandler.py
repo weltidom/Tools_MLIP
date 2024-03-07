@@ -209,7 +209,7 @@ class Xyz:
         self.data = pd.concat(data_lst)
 
     def write(self, data:pd.DataFrame):
-        '''Write configuration data to extended XYZ file for use in MACE.'''
+        '''Write configuration data to extended XYZ file for use in MACE. File will be saved under self.path.xyz'''
         with open(f'{self.path}.xyz', 'w') as f:
             for index, subset in data.iterrows():
                 f.write(f"{subset['Config. size']}\n")
@@ -237,4 +237,4 @@ class Xyz:
                             print(f'Type {species} not contained within self.assign.')
                         f.write(f'{self.type_to_symbol(species)}{position[0]:>24}{position[1]:>24}{position[2]:>24}\n')
 
-        print(f'XYZ file saved {self.path}.xyz')
+        print(f'XYZ file saved under {self.path}.xyz')
