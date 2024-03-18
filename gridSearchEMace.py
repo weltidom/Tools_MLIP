@@ -4,7 +4,7 @@ import pandas as pd
 from itertools import product
 from mace.calculators import MACECalculator
 
-path_model='/home/st/st_us-031400/st_st179390/mace/ANI-1ccx_multi-gpu/ANI-1ccx.model' # path to MACE model (CUDA)
+path_model='~/mace/ANI-1ccx_multi-gpu/ANI-1ccx.model' # path to MACE model (CUDA)
 path_config='graphite.cif' # path to CIF config data
 path_out='test.pkl' # where pkl output will be produced
 

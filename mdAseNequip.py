@@ -9,7 +9,7 @@ splits=np.asplits(0,10)
 for split in splits:
     # paths to
     model = f'results/model_{split}.pth' # needs to be a deployed model
-    data = f'/home/st/st_us-031400/st_st179390/traj/hea/valid/valid_{split}.xyz'
+    data = f'~/traj/hea/valid/valid_{split}.xyz'
     output = f'eval/standard/test_{split}.xyz'
 
 

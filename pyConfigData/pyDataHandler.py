@@ -166,7 +166,7 @@ class Xyz:
                 species=symbol
         return species
     
-    def read(self, desc:str='', inference:bool=False, energy_key:str='NequIP_energy', force_key:str='NequIP_forces'):
+    def read(self, desc:str='', inference:bool=False, energy_key:str='', force_key:str=''):
         '''Read and parse data from extended XYZ file. Resulting dataframe saved under self.data.'''
         atoms_lst = io.read(
             self.path,
@@ -183,7 +183,7 @@ class Xyz:
                     #'Lattice': [entry_dict['cell']],
                     'Configuration': i+1,
                     'Config. size': len(atom.get_positions()),
-                    'Energy': entry_dict['info']['energy'],
+                    #'Energy': entry_dict['info']['energy'],
                     #'Energy_Inference': entry_dict['info'][energy_key],
                     'Atom': [atom.get_chemical_symbols()],
                     'Position': [entry_dict['positions']],

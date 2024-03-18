@@ -6,7 +6,7 @@ import time
 
 from mace.calculators import MACECalculator
 
-calculator = MACECalculator(model_path='/home/st/st_us-031400/st_st179390/mace/ta-v-cr-w/inference/mace_split_0.model', device='cpu')
+calculator = MACECalculator(model_path='~/mace/ta-v-cr-w/inference/mace_split_0.model', device='cpu')
 init_conf = read('', '0')
 init_conf.set_calculator(calculator)
 
