@@ -225,7 +225,7 @@ class Xyz:
                     pbc=f'pbc=\"F F F\"'
 
                 if 'Force' in data.columns:
-                    f.write(f'Energy={float(subset["Energy"])} {lat} Properties=species:S:1:pos:R:3:forces:R:3 {pbc}\n')
+                    f.write(f'energy={float(subset["Energy"])} {lat} Properties=species:S:1:pos:R:3:force:R:3 {pbc}\n')
                     for species, position, force in zip(subset['Atom'], subset['Position'], subset['Force']):
                         if not species in self.assign:
                             print(f'Type {species} not contained within self.assign.')

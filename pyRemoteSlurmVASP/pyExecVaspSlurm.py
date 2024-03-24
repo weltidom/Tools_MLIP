@@ -76,16 +76,22 @@ class Server:
         suffix_to_element:  str=''
             Added suffix to name of potentials. E.g. to choose X_GW potentials, assign "_GW".
         '''
-        file = sftp.open(f'{potcar_folder_path}/{job.elements[0]}/POTCAR', 'r') # open POTCAR for first element in reading mode
-        sftp.putfo(file, f'{self.home_path}/{job.name}/POTCAR', confirm=True) # save as POTCAR in job folder
-        print(f'Created POTCAR for {job.elements[0]}')
-        file.close() # close initial file
-        file = sftp.file(f'{self.home_path}/{job.name}/POTCAR', 'a') # open new POTCAR file in appending mode
+        if job.elements.size>1:
+            element_1 = job.elements[0]
+        else:
+            element_1 = job.elements
 
-        for element in job.elements[1:]:
-            path = f'{potcar_folder_path}/{element}{suffix_to_element}/POTCAR'
-            sftp.getfo(path, file)
-            print(f'Appended POTCAR for {element}')
+        file = sftp.open(f'{potcar_folder_path}/{element_1}{suffix_to_element}/POTCAR', 'r') # open POTCAR for first element in reading mode
+        sftp.putfo(file, f'{self.home_path}/{job.name}/POTCAR', confirm=True) # save as POTCAR in job folder
+        print(f'Created POTCAR for {element_1}')
+        file.close() # close initial file
+        file = sftp.file(f'{self.home_path}/{job.name}/POTCAR', 'a') # open the new POTCAR file in appending mode
+
+        if job.elements.size>1:
+            for element in job.elements[1:]:
+                path = f'{potcar_folder_path}/{element}{suffix_to_element}/POTCAR'
+                sftp.getfo(path, file)
+                print(f'Appended POTCAR for {element}')
             
         file.close() # close final INCAR file
         print('POTCAR files successfully merged and copied to job folder')
@@ -141,6 +147,23 @@ class Server:
         ret = ch.recv_exit_status()
         ch.close()
         print(f'Submitting batch - Exit status of execution command: {ret}')
+
+    def list_folders(self, sftp:object, folder:str):
+        '''Returns list of items in specified folder in SFTP home directory'''
+        return sftp.listdir(f'{self.home_path}/{folder}')
+    
+    def download_folder(self, sftp: object, job_name:str, localfolder):
+        '''Download all files in job folder to local folder.'''
+        # Source and target folders specification
+        os.mkdir(f'{localfolder}/{job_name}')
+        source_folder=f'{self.home_path}/{job_name}/'
+        inbound_files=sftp.listdir(source_folder)
+
+        # Download all files from that path
+        for file in inbound_files:
+            filepath = f'{source_folder}{file}'
+            localpath = f'{localfolder}{job_name}/{file}'
+            sftp.get(filepath, localpath)
 
     def exec_command(self, ts: object, command: str):
         '''Execution of a single SSH command while obtaining list of returns.
