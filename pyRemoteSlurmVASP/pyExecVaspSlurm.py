@@ -39,7 +39,7 @@ class Job:
 
 class Server:
     '''Server class offers methods for connecting to the server, creating folders, and uploading files'''
-    def __init__(self, username: str, host: str, home_path_remote: str, batch_path_remote: str):
+    def __init__(self, username: str, host: str, home_path_remote: str, batch_path_remote: str=''):
         self.host = host
         self.user = username
         self.home_path = home_path_remote # SFTP home path
@@ -152,7 +152,7 @@ class Server:
         '''Returns list of items in specified folder in SFTP home directory'''
         return sftp.listdir(f'{self.home_path}/{folder}')
     
-    def download_folder(self, sftp: object, job_name:str, localfolder):
+    def download_folder(self, sftp: object, job_name:str, localfolder:str):
         '''Download all files in job folder to local folder.'''
         # Source and target folders specification
         os.mkdir(f'{localfolder}/{job_name}')

@@ -29,11 +29,8 @@ bspline_config = bspline.BSplineBasis(chemical_system,
                                       leading_trim=leading_trim,
                                       trailing_trim=trailing_trim)
 
-# specify correct keys used in .xyz file
-data_coordinator = io.DataCoordinator(
-    energy_key='Energy',
-    force_key='forces',
-)
+# specify correct keys used in .xyz file - not correctly implemented, .xyz file needs to have exact strings "energy" and "force" in header
+data_coordinator = io.DataCoordinator()
 
 for split in splits:
     # Paths to
